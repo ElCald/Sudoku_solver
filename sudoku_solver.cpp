@@ -51,33 +51,27 @@ int tab3[9][9] = {
 int tab4[9][9] = {0};
 
 /**
- * return True si la ligne et la colonne sont libres pour la valeur val
+ * @return True si la ligne et la colonne sont libres pour la valeur val
  */
 bool verifier_ligne_colonne(const int x, const int y, const int val){
 
-    // cout << "val:" << val << "|";
     for(int i=0; i<9; i++){
 
         if(abs(tab[x][i]) == val){
-            // cout << endl;
             return false;
         }
 
         if(abs(tab[i][y]) == val){
-            // cout << endl;
             return false;
         }
-
-        // cout << abs(tab[x][i]) << " ";
     }
-    // cout << endl;
 
     return true;
 }//fin verifier_ligne_colonne
 
 
 /**
- * return True si le carré est libre pour la valeur val
+ * @return True si le carré est libre pour la valeur val
  */
 bool verifier_carre(const int x, const int y, const int val){
     int x_deb, x_fin, y_deb, y_fin;
@@ -195,6 +189,7 @@ void sudoku_solver(SDL_Renderer* renderer, int affichage){
         x = n_case/9;
         y = n_case%9;
 
+        // On passe les cases tant que c'est une case fixe
         while(tab[x][y] < 0){
             n_case++;
             x = n_case/9;
@@ -202,8 +197,9 @@ void sudoku_solver(SDL_Renderer* renderer, int affichage){
         }
 
         n = tab[x][y];
-        tab[x][y] = 0;
+        tab[x][y] = 0; // On fait passer la case à "0" pour ne pas perturber la vérification
 
+        // Si c'est une case vide donc "0" on fait commencer n à 1, sinon n garde la valeur de la case
         if(n==0){
             n=1;
         }
@@ -213,7 +209,7 @@ void sudoku_solver(SDL_Renderer* renderer, int affichage){
         while(stop_verif == 0 && n<=9){
             if(verifier_ligne_colonne(x, y, n)){
                 if(verifier_carre(x, y, n)){
-                    tab[x][y] = n;
+                    tab[x][y] = n; // Si tout est bon alors on peut placer la valeur dans la case
                     stop_verif = 1;
                 }
                 else{
@@ -232,13 +228,13 @@ void sudoku_solver(SDL_Renderer* renderer, int affichage){
             x = n_case/9;
             y = n_case%9;
 
-            while(tab[x][y] < 0){
+            while(tab[x][y] < 0){ // On se déplace encore si jamais c'est une case fixe
                 n_case--;
                 x = n_case/9;
                 y = n_case%9;
             }
 
-            tab[x][y]++;
+            tab[x][y]++; // On fait augmenter la valeur de la case de 1 quand on retourne en arrière
         }
         else{
             n_case++;
@@ -246,7 +242,7 @@ void sudoku_solver(SDL_Renderer* renderer, int affichage){
             x = n_case/9;
             y = n_case%9;
 
-            while(tab[x][y] < 0){
+            while(tab[x][y] < 0){ // On se déplace encore si jamais c'est une case fixe
                 n_case++;
                 x = n_case/9;
                 y = n_case%9;
