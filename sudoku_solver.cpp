@@ -3,10 +3,13 @@
 #include <SDL2/SDL_ttf.h>
 #include <cmath>
 
+#include "sudoku_solver.h"
+
 using namespace std;
 
+
 //facile
-int tab3[9][9] = {
+int tab[9][9] = {
     {0,0,0,-7,0,-1,0,-3,0},
     {-1,0,0,0,0,0,0,-4,-5},
     {-5,-7,0,0,-8,-2,0,-9,0},
@@ -32,7 +35,7 @@ int tab2[9][9] = {
 };
 
 //extreme
-int tab[9][9] = {
+int tab3[9][9] = {
     {-8,0,0,0,0,-7,0,-4,0},
     {0,-5,0,0,0,0,0,-8,-9},
     {-9,0,0,0,0,0,0,0,0},
@@ -43,6 +46,7 @@ int tab[9][9] = {
     {0,0,0,-9,-8,-4,0,0,0},
     {-1,0,-5,0,-7,0,0,0,0}
 };
+
 
 /**
  * return True si la ligne et la colonne sont libres pour la valeur val
@@ -167,7 +171,7 @@ void afficher_grille(){
 }
 
 
-void sudoku_solver(){
+void sudoku_solver(SDL_Renderer* renderer){
 
     cout << "grille départ" << endl;
     afficher_grille();
@@ -175,9 +179,15 @@ void sudoku_solver(){
     int n_case = 0; // Nombre de case totale posée
     int n=0;
     int x, y;
-    int stop=0, stop_verif=0;
+    int stop_verif=0;
+    int n_display=0; // valeur pour l'affichage
+    pthread_t t_sudoku;
 
-    while(n_case < 81){// parcours du tableau mais sans boucle for
+    // renderer_sudoku = r;
+
+    // pthread_create(&t_sudoku, NULL, display_jeu, &r);
+
+    while(n_case < 81){// parcours du tableau
 
         x = n_case/9;
         y = n_case%9;
@@ -195,7 +205,7 @@ void sudoku_solver(){
             n=1;
         }
 
-        // cout << x << " " << y << " " << n << " " << n_case << " " << endl;
+        // Boucle qui vérifie les 3 règles
         stop_verif = 0;
         while(stop_verif == 0 && n<=9){
             if(verifier_ligne_colonne(x, y, n)){
@@ -210,10 +220,9 @@ void sudoku_solver(){
             else{
                 n++;  
             }
-            
         }
 
-
+        // Si on dépasse 9 ça veut dire qu'aucune des règles n'est respecté pour la case donc on retourne en arrière
         if(n > 9){
             n_case--;
 
@@ -243,12 +252,137 @@ void sudoku_solver(){
 
         n=0;
 
-        // afficher_grille();
-        stop++;
+        if(n_display%10 == 0){
+            display_jeu(renderer);
+        }
 
+        n_display++;
+
+    
     }//fin while
 
     cout << "grille fin" << endl;
     afficher_grille();
+    display_jeu(renderer);
+
+    // pthread_cancel(t_sudoku);
+    // pthread_join(t_sudoku, NULL);
 
 }//fin main
+
+/**
+ * Méthode qui permet l'affichage de la grille avec SDL2
+ */
+void display_jeu(SDL_Renderer* renderer){
+    int n;
+    char val[8];
+    SDL_Surface* textSurface;
+    SDL_Rect posText;
+    SDL_Color textColor;
+    SDL_Texture* textTexture;
+    SDL_Texture* grilleTexture;
+    SDL_Surface* grilleSurface = NULL;
+
+
+    // Chargement d'une image
+    if( (grilleSurface = SDL_LoadBMP("misc/grille.bmp")) == NULL )
+        exit(EXIT_FAILURE);
+
+    // Chargement de l'image dans une texture pour pouvoir l'afficher
+    if( (grilleTexture = SDL_CreateTextureFromSurface(renderer, grilleSurface)) == NULL ){
+        SDL_FreeSurface(grilleSurface);
+        exit(EXIT_FAILURE);
+    }
+
+    SDL_FreeSurface(grilleSurface); // Libération de la mémoire utilisé par l'image car on ne l'utilise plus
+
+    SDL_Rect posGrille;
+
+    // Charger une police
+    TTF_Font* font = TTF_OpenFont("misc/arial.ttf", SIZE_NUMBER);
+    if (font == nullptr) {
+        cerr << "Erreur de chargement de la police: " << TTF_GetError() << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    // Emplacement de l'image dans notre fenêtre
+    if( (SDL_QueryTexture(grilleTexture, NULL, NULL, &posGrille.w, &posGrille.h)) != 0 )
+        exit(EXIT_FAILURE);
+
+
+    posGrille.w = SIZE_NUMBER*9;
+    posGrille.h = SIZE_NUMBER*9;
+    posGrille.x = 0;
+    posGrille.y = 0;
+
+    
+    // Chargement de la texture contenant l'image dans le rendu pour l'affichage
+    if( (SDL_RenderCopy(renderer, grilleTexture, NULL, &posGrille)) != 0 )
+        exit(EXIT_FAILURE);
+
+
+    
+    // Rendu du visuel
+    SDL_RenderClear(renderer);
+
+    // Chargement de la texture contenant l'image dans le rendu pour l'affichage
+    if( (SDL_RenderCopy(renderer, grilleTexture, NULL, &posGrille)) != 0 )
+        exit(EXIT_FAILURE);
+
+    for(int i=0; i<9; i++){
+        for(int j=0; j<9; j++){
+
+            n = tab[j][i];
+
+            if(n < 0){
+                textColor = {255, 0, 0};// Couleur du texte (rouge)
+                sprintf(val, "%d", abs(n));
+            }
+            else if(n == 0 || n == 10){
+                textColor = {255, 255, 255};// Couleur du texte (blanc)
+                sprintf(val, "%s", " ");
+            }
+            else{
+                textColor = {255, 255, 255};// Couleur du texte (blanc)
+                sprintf(val, "%d", abs(n));
+            }
+            
+
+            // Générer le texte à afficher (par exemple, le chiffre "123")
+            textSurface = TTF_RenderText_Solid(font, val, textColor);
+            if (textSurface == nullptr) {
+                cerr << "Erreur de rendu du texte: " << TTF_GetError() << endl;
+                exit(EXIT_FAILURE);
+            }
+
+            // Créer une texture à partir de la surface du texte
+            textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+            if (textTexture == nullptr) {
+                cerr << "Erreur de création de la texture: " << SDL_GetError() << endl;
+                exit(EXIT_FAILURE);
+            }
+
+
+            // Emplacement de l'image dans notre fenêtre
+            if( (SDL_QueryTexture(textTexture, NULL, NULL, &posText.w, &posText.h)) != 0 )
+                exit(EXIT_FAILURE);
+
+
+            posText.w = SIZE_NUMBER;
+            posText.h = SIZE_NUMBER;
+            posText.x = i*SIZE_NUMBER;
+            posText.y = j*SIZE_NUMBER;
+
+
+            // Chargement de la texture contenant l'image dans le rendu pour l'affichage
+            if( (SDL_RenderCopy(renderer, textTexture, NULL, &posText)) != 0 )
+                exit(EXIT_FAILURE);
+
+        }
+    }
+
+    SDL_FreeSurface(textSurface);
+
+    SDL_RenderPresent(renderer); // Actualise à l'écran
+
+}//fin display jeu
