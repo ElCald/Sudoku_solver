@@ -1,3 +1,3 @@
 # Sudoku_solver
 Complète un sudoku automatiquement
-![screenshot](misc/sudoku_solver_express.gif)
+![screenshot](misc/Sudoku_solver_express.gif)
