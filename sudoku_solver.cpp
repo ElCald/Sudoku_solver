@@ -172,7 +172,11 @@ void afficher_grille(){
     cout << endl;
 }
 
-
+/**
+ * Programme principal pour résoudre la grille
+ * @param renderer Le rendu pour l'affichage
+ * @param affichage Valeur 0 ou 1. Si 0 alors pas d'affichage en temps réel, si 1 affichage en temps réel
+ */
 void sudoku_solver(SDL_Renderer* renderer, int affichage){
 
     cout << "grille départ" << endl;
@@ -185,9 +189,6 @@ void sudoku_solver(SDL_Renderer* renderer, int affichage){
     int n_display=0; // valeur pour l'affichage
     pthread_t t_sudoku;
 
-    // renderer_sudoku = r;
-
-    // pthread_create(&t_sudoku, NULL, display_jeu, &r);
 
     while(n_case < 81){// parcours du tableau
 
@@ -267,13 +268,11 @@ void sudoku_solver(SDL_Renderer* renderer, int affichage){
     afficher_grille();
     display_jeu(renderer);
 
-    // pthread_cancel(t_sudoku);
-    // pthread_join(t_sudoku, NULL);
-
 }//fin main
 
 /**
  * Méthode qui permet l'affichage de la grille avec SDL2
+ * @param renderer Rendu pour l'affichage
  */
 void display_jeu(SDL_Renderer* renderer){
     int n;

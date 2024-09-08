@@ -85,12 +85,6 @@ int main(int argc, char* argv[]){
             }
 
         }//fin boucle event
-/*
-        // Rendu du visuel
-        SDL_RenderClear(renderer);
-
-        SDL_RenderPresent(renderer); // Actualise à l'écran
-*/
     }//fin boucle main
 
 
