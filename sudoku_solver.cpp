@@ -47,6 +47,8 @@ int tab3[9][9] = {
     {-1,0,-5,0,-7,0,0,0,0}
 };
 
+// vide
+int tab4[9][9] = {0};
 
 /**
  * return True si la ligne et la colonne sont libres pour la valeur val
@@ -171,7 +173,7 @@ void afficher_grille(){
 }
 
 
-void sudoku_solver(SDL_Renderer* renderer){
+void sudoku_solver(SDL_Renderer* renderer, int affichage){
 
     cout << "grille départ" << endl;
     afficher_grille();
@@ -252,7 +254,7 @@ void sudoku_solver(SDL_Renderer* renderer){
 
         n=0;
 
-        if(n_display%10 == 0){
+        if(affichage == 1 && n_display%10 == 0){
             display_jeu(renderer);
         }
 

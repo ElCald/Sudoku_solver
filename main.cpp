@@ -27,6 +27,11 @@ void ExitWithError(const char* msg){
 
 int main(int argc, char* argv[]){
 
+    if(argc != 1+1){
+        cerr << "Paramètres : 0 pas d'affichage, 1 : affichage" << endl;
+        exit(EXIT_FAILURE);
+    }
+
     fenetre = NULL;
     renderer = NULL;
     SDL_Surface* perso = NULL;
@@ -49,7 +54,7 @@ int main(int argc, char* argv[]){
 
 
     // ---------------------- Chargement des images et objets ----------------------
-    sudoku_solver(renderer);
+    sudoku_solver(renderer, atoi(argv[1]));
 
 
     SDL_bool program_launched = SDL_TRUE; // Conditionnelle pour garder la fenêtre ouverte
