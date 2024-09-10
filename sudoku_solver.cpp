@@ -9,7 +9,7 @@ using namespace std;
 
 
 //facile
-int tab[9][9] = {
+int tab2[9][9] = {
     {0,0,0,-7,0,-1,0,-3,0},
     {-1,0,0,0,0,0,0,-4,-5},
     {-5,-7,0,0,-8,-2,0,-9,0},
@@ -22,7 +22,7 @@ int tab[9][9] = {
 };
 
 //expert
-int tab2[9][9] = {
+int tab3[9][9] = {
     {0,0,0,-8,-3,0,0,-5,-7},
     {0,0,-8,-5,0,0,-6,0,0},
     {-1,-3,0,0,0,-2,0,-8,0},
@@ -35,7 +35,7 @@ int tab2[9][9] = {
 };
 
 //extreme
-int tab3[9][9] = {
+int tab[9][9] = {
     {-8,0,0,0,0,-7,0,-4,0},
     {0,-5,0,0,0,0,0,-8,-9},
     {-9,0,0,0,0,0,0,0,0},
@@ -51,6 +51,8 @@ int tab3[9][9] = {
 int tab4[9][9] = {0};
 
 /**
+ * Fonction qui vérifie si la colonne et la ligne se trouvant en (x,y) est libre pour la valeur "val".
+ * On utilise abs() pour avoir la valeur absolu des valeurs dans la grille car les cases fixes sont des nombres négatifs.
  * @return True si la ligne et la colonne sont libres pour la valeur val
  */
 bool verifier_ligne_colonne(const int x, const int y, const int val){
@@ -71,6 +73,7 @@ bool verifier_ligne_colonne(const int x, const int y, const int val){
 
 
 /**
+ * Fonction qui vérifie si le carré qui contient (x,y) est libre pour la valeur "val".
  * @return True si le carré est libre pour la valeur val
  */
 bool verifier_carre(const int x, const int y, const int val){
@@ -164,10 +167,11 @@ void afficher_grille(){
         cout << endl;
     }
     cout << endl;
-}
+}//fin afficher_grille
+
 
 /**
- * Programme principal pour résoudre la grille
+ * Programme principal qui contient l'algo pour résoudre la grille
  * @param renderer Le rendu pour l'affichage
  * @param affichage Valeur 0 ou 1. Si 0 alors pas d'affichage en temps réel, si 1 affichage en temps réel
  */
@@ -177,15 +181,16 @@ void sudoku_solver(SDL_Renderer* renderer, int affichage){
     afficher_grille();
 
     int n_case = 0; // Nombre de case totale posée
-    int n=0;
+    int n=0; // valeur des cases
     int x, y;
-    int stop_verif=0;
+    int stop_verif=0; // variable qui permet l'arrêt de la boucle while qui test les règles sur les cases si une valeur est correct
     int n_display=0; // valeur pour l'affichage
     pthread_t t_sudoku;
 
 
     while(n_case < 81){// parcours du tableau
 
+        n = 0;
         x = n_case/9;
         y = n_case%9;
 
@@ -199,24 +204,20 @@ void sudoku_solver(SDL_Renderer* renderer, int affichage){
         n = tab[x][y];
         tab[x][y] = 0; // On fait passer la case à "0" pour ne pas perturber la vérification
 
-        // Si c'est une case vide donc "0" on fait commencer n à 1, sinon n garde la valeur de la case
+        // Si c'est une case vide donc "0" on fait commencer "n" à 1, dans les autres cas, "n" garde la valeur de la case
         if(n==0){
             n=1;
         }
+    
 
         // Boucle qui vérifie les 3 règles
         stop_verif = 0;
         while(stop_verif == 0 && n<=9){
-            if(verifier_ligne_colonne(x, y, n)){
-                if(verifier_carre(x, y, n)){
-                    tab[x][y] = n; // Si tout est bon alors on peut placer la valeur dans la case
-                    stop_verif = 1;
-                }
-                else{
-                    n++;  
-                }
+            if(verifier_ligne_colonne(x, y, n) && verifier_carre(x, y, n)){
+                tab[x][y] = n; // Si tout est bon alors on peut placer la valeur dans la case
+                stop_verif = 1;
             }
-            else{
+            else{ // Si la valeur essayé dans une case n'est pas correct on passe à la suivante
                 n++;  
             }
         }
@@ -234,9 +235,9 @@ void sudoku_solver(SDL_Renderer* renderer, int affichage){
                 y = n_case%9;
             }
 
-            tab[x][y]++; // On fait augmenter la valeur de la case de 1 quand on retourne en arrière
+            tab[x][y]++; // On fait augmenter la valeur de la case de 1 quand on retourne en arrière comme sa valeur dans cette configuration ne peut pas être correct
         }
-        else{
+        else{ // Si au contraire c'est correct on avance dans les cases d'après
             n_case++;
 
             x = n_case/9;
@@ -249,13 +250,12 @@ void sudoku_solver(SDL_Renderer* renderer, int affichage){
             }
         }
 
-        n=0;
 
         if(affichage == 1 && n_display%10 == 0){
             display_jeu(renderer);
         }
 
-        n_display++;
+        n_display++; // variable pour limiter l'affichage et réduire la perte de performance en attendant le thread
 
     
     }//fin while
@@ -345,7 +345,7 @@ void display_jeu(SDL_Renderer* renderer){
             }
             
 
-            // Générer le texte à afficher (par exemple, le chiffre "123")
+            // Générer le texte à afficher
             textSurface = TTF_RenderText_Solid(font, val, textColor);
             if (textSurface == nullptr) {
                 cerr << "Erreur de rendu du texte: " << TTF_GetError() << endl;
